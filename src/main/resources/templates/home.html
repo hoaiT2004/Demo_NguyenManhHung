@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #343a40;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60vh;
+            gap: 40px;
+            padding: 40px;
+        }
+        .menu-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 220px;
+            height: 160px;
+            background-color: #ffffff;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .menu-btn:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 16px rgba(0, 123, 255, 0.2);
+            transform: translateY(-4px);
+        }
+        .menu-btn .icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+        .logout-link {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .logout-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header" style="position: relative;">
+        <h2>Hệ thống kiểm tra an ninh bằng vân tay</h2>
+        <a th:href="@{/logout}" class="logout-link">Đăng xuất</a>
+    </div>
+    <div class="content">
+        <a th:href="@{/manageEmployee}" id="btnManageEmployee" class="menu-btn">
+            <span class="icon">👥</span>
+            Quản lý nhân viên
+        </a>
+        <a th:href="@{/statisticModel}" id="btnStatisticModel" class="menu-btn">
+            <span class="icon">📊</span>
+            Thống kê mô hình
+        </a>
+    </div>
+</body>
+</html>
