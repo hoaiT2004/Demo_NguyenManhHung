@@ -29,17 +29,12 @@ public class UserService {
         return false;
     }
 
-    public List<Employee> getListEmployee(String name) {
-        return employeeRepository.getEmployeeStartwithfullName(name);
-    }
-
-    @Transactional
-    public boolean deleteUser(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isPresent()) {
-            userRepository.delete(user.get());
-            return true;
+    public boolean registerUser(User user) {
+        Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
+        if (existingUser.isPresent()) {
+            return false; // Username already exists
         }
-        return false;
+        userRepository.save(user); // Save password as plain text per requirement
+        return true;
     }
 }

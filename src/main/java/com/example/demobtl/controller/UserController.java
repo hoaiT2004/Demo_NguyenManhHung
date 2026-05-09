@@ -22,8 +22,24 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/login")
-    public String showLogin(Model model) {
+    public String showLogin() {
         return "login";
+    }
+
+    @GetMapping("/register")
+    public String showRegister() {
+        return "register";
+    }
+
+    @PostMapping("/register")
+    public String register(@ModelAttribute User u, RedirectAttributes redirectAttributes) {
+        if (userService.registerUser(u)) {
+            redirectAttributes.addFlashAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
+            return "redirect:/login";
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Tên đăng nhập đã tồn tại!");
+            return "redirect:/register";
+        }
     }
 
     @PostMapping("/login")
@@ -43,42 +59,6 @@ public class UserController {
             return "redirect:/login";
         }
         return "home";
-    }
-
-    @GetMapping("/manageEmployee")
-    public String showListEmployee(@RequestParam(required = false) String fullName, Model model, HttpSession session) {
-        if (session.getAttribute("loggedInUser") == null) {
-            return "redirect:/login";
-        }
-        if (fullName != null && !fullName.trim().isEmpty()) {
-            List<Employee> employeeList = userService.getListEmployee(fullName);
-            model.addAttribute("employees", employeeList);
-            model.addAttribute("search", fullName);
-        }
-        return "manageEmployee";
-    }
-
-    @GetMapping("/confirmDialog")
-    public String showDialogConfirm(@RequestParam Long userId, Model model, HttpSession session) {
-        if (session.getAttribute("loggedInUser") == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("userId", userId);
-        return "confirmDialog";
-    }
-
-    @PostMapping("/deleteUser")
-    public String deleteUser(@RequestParam Long userId, HttpSession session, RedirectAttributes redirectAttributes) {
-        if (session.getAttribute("loggedInUser") == null) {
-            return "redirect:/login";
-        }
-        try {
-            userService.deleteUser(userId);
-            redirectAttributes.addFlashAttribute("success", "Xóa nhân viên thành công");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa nhân viên");
-        }
-        return "redirect:/manageEmployee";
     }
 
     @GetMapping("/logout")

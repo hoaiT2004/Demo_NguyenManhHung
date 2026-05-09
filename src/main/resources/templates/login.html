@@ -70,6 +70,16 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
+        .success-message {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: -10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -77,6 +87,9 @@
         <h2>Đăng nhập hệ thống</h2>
         <div th:if="${error}" class="error-message">
             <p th:text="${error}"></p>
+        </div>
+        <div th:if="${success}" class="success-message">
+            <p th:text="${success}"></p>
         </div>
         <form th:action="@{/login}" method="post">
             <div class="form-group">
@@ -89,6 +102,9 @@
             </div>
             <button type="submit" id="btnLogin" class="btnLogin">Đăng nhập</button>
         </form>
+        <div style="margin-top: 15px;">
+            <a th:href="@{/register}" style="color: #007bff; text-decoration: none;">Chưa có tài khoản? Đăng ký ngay</a>
+        </div>
     </div>
 </body>
 </html>

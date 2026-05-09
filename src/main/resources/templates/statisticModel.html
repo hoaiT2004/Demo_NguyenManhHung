@@ -4,241 +4,302 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thống kê mô hình</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .header { background-color: #343a40; color: white; padding: 15px 20px; text-align: center; }
+        .nav { background-color: #007bff; display: flex; justify-content: center; padding: 10px 0; }
+        .nav a { color: white; text-decoration: none; padding: 10px 20px; font-weight: bold; transition: background 0.3s; }
+        .nav a:hover { background-color: #0056b3; border-radius: 4px; }
+        .content { padding: 25px 40px; }
+        h2 { color: #333; margin-bottom: 20px; }
+        h3 { color: #444; margin: 0 0 14px 0; font-size: 15px; }
+
+        /* ===== Filter Box ===== */
+        .filter-box {
+            background-color: #fff; padding: 20px 25px; border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 4px solid #007bff;
         }
-        .header {
-            background-color: #343a40;
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
+        .filter-box h3 { margin-top: 0; color: #007bff; font-size: 15px; }
+        .filter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 20px; }
+        .filter-group { display: flex; flex-direction: column; }
+        .filter-group label { font-weight: bold; color: #555; margin-bottom: 5px; font-size: 13px; }
+        .filter-group input {
+            padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px;
+            font-size: 14px; transition: border-color 0.2s;
         }
-        .nav {
-            background-color: #007bff;
-            display: flex;
-            justify-content: center;
-            padding: 10px 0;
+        .filter-group input:focus {
+            border-color: #007bff; outline: none; box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
         }
-        .nav a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-        .nav a:hover {
-            background-color: #0056b3;
-            border-radius: 4px;
-        }
-        .content {
-            padding: 30px 40px;
-        }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .filter-container {
-            margin-bottom: 25px;
-            background-color: #fff;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: inline-block;
-        }
-        .filter-container form {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        .filter-container label {
-            font-weight: bold;
-            color: #555;
-        }
-        #selectField {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-            min-width: 200px;
-        }
+        .filter-actions { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
         .btnFilter {
-            padding: 9px 20px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
+            padding: 10px 28px; background-color: #007bff; color: white;
+            border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;
         }
-        .btnFilter:hover {
-            background-color: #218838;
+        .btnFilter:hover { background-color: #0056b3; }
+        .btnReset {
+            padding: 10px 24px; background-color: #dc3545; color: white;
+            border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; text-decoration: none;
         }
+        .btnReset:hover { background-color: #c82333; }
         .btnBack {
-            padding: 9px 15px;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: bold;
+            padding: 9px 15px; background-color: #6c757d; color: white;
+            border: none; border-radius: 4px; cursor: pointer; text-decoration: none; font-weight: bold;
         }
-        .btnBack:hover {
-            background-color: #5a6268;
+        .btnBack:hover { background-color: #5a6268; }
+
+        /* ===== Result count ===== */
+        .result-count {
+            background-color: #e9f7ef; border: 1px solid #c3e6cb;
+            color: #155724; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; font-weight: bold;
         }
-        .chart-container {
-            display: flex;
-            gap: 40px;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            margin-top: 20px;
+
+        /* ===== Chart grid ===== */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
         }
-        .chart-wrapper {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            max-width: 450px;
+        .chart-card {
+            background: #fff; border-radius: 8px; padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
-        table {
-            border-collapse: collapse;
-            background-color: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            min-width: 350px;
+        .chart-card h3 { border-bottom: 2px solid #007bff; padding-bottom: 8px; color: #007bff; }
+        .chart-full {
+            background: #fff; border-radius: 8px; padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 24px;
         }
-        th, td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            text-align: left;
+        .chart-full h3 { border-bottom: 2px solid #28a745; padding-bottom: 8px; color: #28a745; }
+
+        /* ===== Table ===== */
+        table { width: 100%; border-collapse: collapse; background-color: white; }
+        th, td { padding: 10px 14px; border: 1px solid #ddd; text-align: left; font-size: 14px; }
+        th { background-color: #f2f2f2; color: #333; font-weight: bold; position: sticky; top: 0; z-index: 1; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #e8f4fd; }
+        .model-list-section h3 { border-bottom: 2px solid #6c757d; padding-bottom: 8px; color: #444; }
+        .table-scroll { max-height: 380px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; }
+        .no-data {
+            text-align: center; padding: 30px; background: white;
+            border-radius: 4px; color: #555; border: 1px solid #ddd; margin-top: 20px;
         }
-        th {
-            background-color: #f2f2f2;
-            color: #333;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .selected-field-label {
-            color: #007bff;
-            font-weight: bold;
-        }
+
+        /* accuracy/precision/recall cell coloring */
+        .high   { color: #155724; font-weight: bold; }
+        .medium { color: #856404; font-weight: bold; }
+        .low    { color: #721c24; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>Thống kê mô hình</h2>
-    </div>
-    <div class="nav">
-        <a th:href="@{/home}">Trang chủ</a>
-        <a th:href="@{/manageEmployee}">Quản lý nhân viên</a>
-        <a th:href="@{/statisticModel}">Thống kê mô hình</a>
-        <a th:href="@{/logout}">Đăng xuất</a>
-    </div>
-    <div class="content">
-        <a th:href="@{/home}" class="btnBack">← Quay lại</a>
-        <h2>Thống kê theo trường</h2>
+<div class="header">
+    <h2>Thống kê mô hình</h2>
+</div>
+<div class="nav">
+    <a th:href="@{/home}">Trang chủ</a>
+    <a th:href="@{/manageEmployee}">Quản lý nhân viên</a>
+    <a th:href="@{/statisticModel}">Thống kê mô hình</a>
+    <a th:href="@{/logout}">Đăng xuất</a>
+</div>
+<div class="content">
+    <a th:href="@{/home}" class="btnBack">← Quay lại</a>
 
-        <div class="filter-container">
-            <form th:action="@{/statisticModel}" method="get">
-                <label for="selectField">Chọn trường thống kê:</label>
-                <select id="selectField" name="field">
-                    <option value="">-- Chọn trường --</option>
-                    <option value="name" th:selected="${field == 'name'}">Tên mô hình (name)</option>
-                    <option value="version" th:selected="${field == 'version'}">Phiên bản (version)</option>
-                    <option value="accuracy" th:selected="${field == 'accuracy'}">Độ chính xác (accuracy)</option>
-                    <option value="precision" th:selected="${field == 'precision'}">Độ chính xác dương tính (precision)</option>
-                    <option value="recall" th:selected="${field == 'recall'}">Độ nhạy (recall)</option>
-                    <option value="trainConfig" th:selected="${field == 'trainConfig'}">Cấu hình huấn luyện (trainConfig)</option>
-                </select>
-                <button type="submit" id="btnFilter" class="btnFilter">Thống kê</button>
-            </form>
-        </div>
-
-        <div th:if="${statisticData != null}" class="chart-container">
-            <div class="chart-wrapper">
-                <h3>Biểu đồ thống kê theo trường: <span class="selected-field-label" th:text="${field}"></span></h3>
-                <canvas id="pieChart" width="400" height="400"></canvas>
+    <!-- ========== BỘ LỌC ========== -->
+    <div class="filter-box" style="margin-top: 15px;">
+        <h3>🔍 BỘ LỌC NÂNG CAO (ADVANCED FILTERS)</h3>
+        <form th:action="@{/statisticModel}" method="get">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="txtName">Tên mô hình</label>
+                    <input type="text" id="txtName" name="txtName" th:value="${txtName}" placeholder="Nhập tên...">
+                </div>
+                <div class="filter-group">
+                    <label for="txtVersion">Phiên bản</label>
+                    <input type="text" id="txtVersion" name="txtVersion" th:value="${txtVersion}" placeholder="VD: 1.0, 2.0...">
+                </div>
+                <div class="filter-group">
+                    <label for="txtAccuracy">Accuracy ≥</label>
+                    <input type="number" id="txtAccuracy" name="txtAccuracy" th:value="${txtAccuracy}" placeholder="VD: 0.90" step="0.01" min="0" max="1">
+                </div>
+                <div class="filter-group">
+                    <label for="txtPrecision">Precision ≥</label>
+                    <input type="number" id="txtPrecision" name="txtPrecision" th:value="${txtPrecision}" placeholder="VD: 0.85" step="0.01" min="0" max="1">
+                </div>
+                <div class="filter-group">
+                    <label for="txtRecall">Recall ≥</label>
+                    <input type="number" id="txtRecall" name="txtRecall" th:value="${txtRecall}" placeholder="VD: 0.80" step="0.01" min="0" max="1">
+                </div>
+                <div class="filter-group">
+                    <label for="txtTrainConfig">Cấu hình (Keyword)</label>
+                    <input type="text" id="txtTrainConfig" name="txtTrainConfig" th:value="${txtTrainConfig}" placeholder="VD: lr, epochs...">
+                </div>
+                <div class="filter-group">
+                    <label for="createdAt">Thời gian huấn luyện (từ ngày)</label>
+                    <input type="date" id="createdAt" name="createdAt" th:value="${createdAt}">
+                </div>
             </div>
-
-            <div>
-                <h3>Bảng thống kê</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Giá trị</th>
-                            <th>Số lượng</th>
-                            <th>Tỷ lệ (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="stat, iterStat : ${statisticData}">
-                            <td th:text="${iterStat.index + 1}"></td>
-                            <td th:text="${stat.label}"></td>
-                            <td th:text="${stat.count}"></td>
-                            <td th:text="${stat.percentage + '%'}"></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="filter-actions">
+                <button type="submit" id="btnFilter" class="btnFilter">LỌC (FILTER)</button>
+                <a th:href="@{/statisticModel}" class="btnReset">RESET</a>
             </div>
-        </div>
+        </form>
+    </div>
 
-        <div th:if="${statisticData == null}" style="text-align: center; padding: 20px; background: white; border-radius: 4px; color: #555; border: 1px solid #ddd; margin-top: 20px;">
-            Vui lòng chọn trường thống kê và nhấn "Thống kê" để hiển thị kết quả.
+    <!-- ========== KẾT QUẢ ========== -->
+    <div th:if="${ListModel != null}" class="result-count">
+        📋 Tìm thấy <strong th:text="${totalFiltered}"></strong> mô hình phù hợp
+    </div>
+
+<!--    &lt;!&ndash; ========== BIỂU ĐỒ ========== &ndash;&gt;-->
+<!--    <div th:if="${ListModel != null and !#lists.isEmpty(ListModel)}">-->
+
+<!--        &lt;!&ndash; Hàng 1: Biểu đồ cột so sánh + Biểu đồ tròn theo tên &ndash;&gt;-->
+<!--        <div class="charts-grid">-->
+<!--            <div class="chart-card">-->
+<!--                <h3>📊 So sánh Accuracy / Precision / Recall</h3>-->
+<!--                <canvas id="barChart" height="260"></canvas>-->
+<!--            </div>-->
+<!--            <div class="chart-card">-->
+<!--                <h3>🥧 Phân bố theo Tên mô hình</h3>-->
+<!--                <canvas id="pieChart" height="260"></canvas>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Hàng 2: Đường xu hướng accuracy theo từng phiên bản &ndash;&gt;-->
+<!--        <div class="chart-full">-->
+<!--            <h3>📈 Xu hướng Accuracy / Precision / Recall theo phiên bản</h3>-->
+<!--            <canvas id="lineChart" height="120"></canvas>-->
+<!--        </div>-->
+
+<!--    </div>-->
+
+    <!-- ========== tblModel ========== -->
+    <div th:if="${ListModel != null}" class="model-list-section">
+        <h3>📃 DANH SÁCH PHIÊN BẢN MÔ HÌNH (MODEL VERSION LIST)</h3>
+        <div class="table-scroll">
+            <table id="tblModel">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Tên</th>
+                    <th>Phiên bản</th>
+                    <th>Ngày tạo</th>
+                    <th>Accuracy</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>Cấu hình</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="m, iterStat : ${ListModel}">
+                    <td th:text="${iterStat.index + 1}"></td>
+                    <td th:text="${m.name}"></td>
+                    <td th:text="${m.version}"></td>
+                    <td th:text="${m.createdAt != null ? #temporals.format(m.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+                    <td th:text="${m.accuracy != null ? m.accuracy : 'N/A'}"
+                        th:classappend="${m.accuracy != null and m.accuracy >= 0.95} ? 'high' : (${m.accuracy != null and m.accuracy >= 0.90} ? 'medium' : 'low')"></td>
+                    <td th:text="${m.precision != null ? m.precision : 'N/A'}"
+                        th:classappend="${m.precision != null and m.precision >= 0.93} ? 'high' : (${m.precision != null and m.precision >= 0.88} ? 'medium' : 'low')"></td>
+                    <td th:text="${m.recall != null ? m.recall : 'N/A'}"
+                        th:classappend="${m.recall != null and m.recall >= 0.92} ? 'high' : (${m.recall != null and m.recall >= 0.87} ? 'medium' : 'low')"></td>
+                    <td th:text="${m.trainConfig != null ? m.trainConfig : 'N/A'}"
+                        style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" th:title="${m.trainConfig}"></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(ListModel)}">
+                    <td colspan="8" style="text-align: center;">Không tìm thấy mô hình nào phù hợp.</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <script th:if="${statisticData != null}" th:inline="javascript">
-        const labels = /*[[${statisticData.![label]}]]*/ [];
-        const counts = /*[[${statisticData.![count]}]]*/ [];
+    <div th:if="${ListModel == null}" class="no-data">
+        Vui lòng nhập các tiêu chí lọc và nhấn <strong>"LỌC (FILTER)"</strong> để hiển thị kết quả và biểu đồ thống kê.
+    </div>
+</div>
 
-        const colors = [
-            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-            '#FF9F40', '#E7E9ED', '#7BC225', '#D4526E', '#13D8AA',
-            '#A5978B', '#2B908F', '#F9A3A4', '#90EE7E', '#FA4443'
-        ];
+<!-- ========== CHARTS SCRIPT ========== -->
+<script th:if="${ListModel != null and !#lists.isEmpty(ListModel)}" th:inline="javascript">
+    // Extract từng field riêng (tránh serialize JPA entity gây lỗi)
+    const labels     = /*[[${ListModel.![name + ' v' + version]}]]*/ [];
+    const accuracies = /*[[${ListModel.![accuracy  != null ? accuracy  : 0]}]]*/ [];
+    const precisions = /*[[${ListModel.![precision != null ? precision : 0]}]]*/ [];
+    const recalls    = /*[[${ListModel.![recall    != null ? recall    : 0]}]]*/ [];
+    const names      = /*[[${ListModel.![name != null ? name : 'N/A']}]]*/ [];
 
-        const ctx = document.getElementById('pieChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: counts,
-                    backgroundColor: colors.slice(0, labels.length),
-                    borderColor: '#fff',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            font: { size: 13 }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.raw / total) * 100).toFixed(1);
-                                return context.label + ': ' + context.raw + ' (' + percentage + '%)';
-                            }
+    // ── 1. BAR CHART: so sánh 3 chỉ số theo từng model ──────────────────
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Accuracy',  data: accuracies,  backgroundColor: 'rgba(54,162,235,0.75)',  borderColor: '#36A2EB', borderWidth: 1 },
+                { label: 'Precision', data: precisions,  backgroundColor: 'rgba(75,192,192,0.75)',  borderColor: '#4BC0C0', borderWidth: 1 },
+                { label: 'Recall',    data: recalls,     backgroundColor: 'rgba(255,159,64,0.75)', borderColor: '#FF9F40', borderWidth: 1 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+                y: { min: 0, max: 1, ticks: { callback: v => (v*100).toFixed(0)+'%' } }
+            }
+        }
+    });
+
+    // ── 2. PIE CHART: phân bố theo tên mô hình ───────────────────────────
+    const nameCounts = {};
+    names.forEach(n => { nameCounts[n] = (nameCounts[n] || 0) + 1; });
+    const pieLabels = Object.keys(nameCounts);
+    const pieCounts = Object.values(nameCounts);
+    const pieColors = ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#E7E9ED','#7BC225'];
+
+    new Chart(document.getElementById('pieChart'), {
+        type: 'pie',
+        data: {
+            labels: pieLabels,
+            datasets: [{ data: pieCounts, backgroundColor: pieColors.slice(0, pieLabels.length), borderColor: '#fff', borderWidth: 2 }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 12, font: { size: 13 } } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+                            return ctx.label + ': ' + ctx.raw + ' (' + ((ctx.raw/total)*100).toFixed(1) + '%)';
                         }
                     }
                 }
             }
-        });
-    </script>
+        }
+    });
+
+    // ── 3. LINE CHART: xu hướng accuracy/precision/recall ─────────────────
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Accuracy',  data: accuracies,  borderColor: '#36A2EB', backgroundColor: 'rgba(54,162,235,0.08)',  tension: 0.3, pointRadius: 4, fill: true },
+                { label: 'Precision', data: precisions,  borderColor: '#4BC0C0', backgroundColor: 'rgba(75,192,192,0.08)',  tension: 0.3, pointRadius: 4, fill: true },
+                { label: 'Recall',    data: recalls,     borderColor: '#FF9F40', backgroundColor: 'rgba(255,159,64,0.08)', tension: 0.3, pointRadius: 4, fill: true }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+                y: {
+                    min: 0, max: 1,
+                    ticks: { callback: v => (v*100).toFixed(0)+'%' }
+                },
+                x: { ticks: { maxRotation: 45, minRotation: 30 } }
+            }
+        }
+    });
+</script>
 </body>
 </html>

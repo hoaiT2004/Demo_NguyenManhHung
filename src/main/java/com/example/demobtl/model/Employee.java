@@ -18,7 +18,7 @@ public class Employee {
     private String address;
     private String department;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "user_id")
     @ToString.Exclude
