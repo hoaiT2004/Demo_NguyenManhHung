@@ -32,7 +32,7 @@ public class DemoBtlApplication {
         SpringApplication.run(DemoBtlApplication.class, args);
     }
 
-u//    @PostConstruct
+//    @PostConstruct
 //    public void initData() {
 //        if (userRepository.count() > 0 || modelRepository.count() > 0) {
 //            return;
